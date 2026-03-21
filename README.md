@@ -55,7 +55,7 @@
 
 ### 1 Clone the project
 ```bash
-git clone https://github.com/username/sha-ntieb.git
+git clone https://github.com/feredj/sha-ntieb
 cd sha-ntieb
 ```
 ###  2 Database 
