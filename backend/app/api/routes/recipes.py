@@ -26,7 +26,7 @@ def get_recipes(
         return query.offset(skip).limit(limit).all()
     except Exception as e:
         print(f"Error fetching recipes: {e}")
-        return []  # ← إرجاع قائمة فارغة بدل خطأ 500
+        return []  # return empty list
 
 
 @router.get("/{recipe_id}", response_model=RecipeOut)
@@ -43,7 +43,7 @@ def search_by_ingredients(
         lang: str = "ar",
         db: Session = Depends(get_db)
 ):
-    """البحث عن وصفات بناءً على المكونات المتاحة"""
+    # looking for recipes by ingredients
     results = []
     all_recipes = db.query(Recipe).all()
 
@@ -53,7 +53,7 @@ def search_by_ingredients(
             name = ri.ingredient.name_ar if lang == "ar" else ri.ingredient.name_en
             recipe_ingredients.append(name.lower())
 
-        # حساب نسبة التطابق
+        # Calculating the matching percentage
         matched = sum(
             1 for ing in ingredients
             if any(ing.lower() in r for r in recipe_ingredients)
@@ -67,7 +67,7 @@ def search_by_ingredients(
                 if recipe_ingredients else 0
             })
 
-    # ترتيب حسب نسبة التطابق
+    # Sort by percentage of match
     results.sort(key=lambda x: x["match_percent"], reverse=True)
     return results[:10]
 
@@ -94,7 +94,7 @@ def rate_recipe(
 
     db.commit()
 
-    # تحديث متوسط التقييم
+    # Average rating update
     ratings = db.query(Rating).filter(Rating.recipe_id == recipe_id).all()
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
     recipe.rating = sum(r.score for r in ratings) / len(ratings)
@@ -110,7 +110,7 @@ def ai_search(
     use_transformer: bool = False,
     db: Session = Depends(get_db)
 ):
-    """🤖 البحث الذكي باستخدام AI"""
+    """ Smart search using AI"""
     results = ai_recommend(
         user_ingredients=ingredients,
         db=db,
@@ -149,5 +149,5 @@ def suggest_missing_ingredients(
     lang: str = "ar",
     db: Session = Depends(get_db)
 ):
-    """💡 اقتراح المكونات الناقصة"""
+    """Suggesting missing components"""
     return suggest_missing(ingredients, db, lang)

@@ -9,10 +9,10 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.post("/register", response_model=Token)
 def register(data: UserCreate, db: Session = Depends(get_db)):
-    # تحقق من البريد
+    # chek email
     if db.query(User).filter(User.email == data.email).first():
         raise HTTPException(status_code=400, detail="Email already exists")
-    # تحقق من اسم المستخدم
+    # check username
     if db.query(User).filter(User.username == data.username).first():
         raise HTTPException(status_code=400, detail="Username already exists")
     try:

@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings
 from pathlib import Path
 
-# المسار الصحيح لملف .env
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 class Settings(BaseSettings):

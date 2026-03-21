@@ -110,7 +110,7 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
         imported += 1
 
     db.commit()
-    return {"message": f"✅ تم استيراد {imported} وصفة بنجاح!"}
+    return {"message": f" تم استيراد {imported} وصفة بنجاح!"}
 
 @router.delete("/recipes/{recipe_id}")
 def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):

@@ -11,10 +11,10 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    description="🍲 تطبيق اقتراح الوصفات الجزائرية"
+    description=" تطبيق اقتراح الوصفات الجزائرية"
 )
 
-# ← أضف هذا لإظهار كل الأخطاء
+#show all errors
 @app.middleware("http")
 async def catch_exceptions(request: Request, call_next):
     try:
@@ -40,4 +40,4 @@ app.include_router(admin.router, prefix="/api")
 
 @app.get("/")
 def root():
-    return {"message": "🍲 مرحباً بك في شا نطيب API!"}
+    return {"message": "مرحبا بك في منصتنا شا نطيب"}

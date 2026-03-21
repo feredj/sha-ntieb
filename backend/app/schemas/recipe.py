@@ -37,7 +37,7 @@ class RecipeBase(BaseModel):
     image_url: Optional[str] = None
 
 class RecipeCreate(RecipeBase):
-    ingredients: List[int] = []  # قائمة IDs المكونات
+    ingredients: List[int] = []
 
 class RecipeOut(RecipeBase):
     id: int
