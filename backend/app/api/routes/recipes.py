@@ -103,3 +103,27 @@ def rate_recipe(
 
     return {"message": "Rated successfully", "new_rating": recipe.rating}
 
+@router.post("/ai-search")
+def ai_search(
+    ingredients: List[str],
+    lang: str = "ar",
+    db: Session = Depends(get_db)
+):
+    results = ai_recommend(
+        user_ingredients=ingredients,
+        db=db,
+        lang=lang,
+        limit=10
+    )
+
+    return [
+        {
+            "recipe":          {...},
+            "match_percent":   r["match_percent"],   # ← 85%
+            "ai_score":        r["ai_score"],         # ← 78.3
+            "matched_ingredients": r["matched_ingredients"],
+            "missing_ingredients": r["missing_ingredients"],
+            "can_make":        r["can_make"],
+        }
+        for r in results
+    ]
