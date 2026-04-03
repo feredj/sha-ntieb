@@ -168,7 +168,7 @@ def ai_recommend(
             )
 
         # فقط نتائج ذات قيمة
-        if simple["match_count"] > 0 or tfidf_score > 0.1:
+        if simple["match_percent"] >= 20:
             results.append({
                 "recipe": recipe,
                 "match_percent":        round(simple["match_percent"]),
