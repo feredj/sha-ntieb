@@ -1,8 +1,8 @@
 import re
 import math
-from typing import List, Dict, Tuple
+from typing import List, Dict
 from sqlalchemy.orm import Session
-from ..models.recipe import Recipe, RecipeIngredient, Ingredient
+from ..models.recipe import Recipe
 
 
 def normalize(text: str) -> str:
@@ -12,12 +12,14 @@ def normalize(text: str) -> str:
     text = re.sub(r'[يى]', 'ي', text)
     return text
 
+
 def get_recipe_ingredients(recipe: Recipe, lang: str = 'ar') -> List[str]:
     ingredients = []
     for ri in recipe.ingredients:
         name = ri.ingredient.name_ar if lang == 'ar' else ri.ingredient.name_en
         ingredients.append(normalize(name))
     return ingredients
+
 
 def simple_match_score(
     user_ingredients: List[str],
@@ -51,6 +53,7 @@ def simple_match_score(
         "can_make": match_percent >= 70,  # يمكن طبخها إذا 70%+ متوفر
     }
 
+
 def build_tfidf_vector(
     ingredients: List[str],
     all_words: List[str]
@@ -66,6 +69,7 @@ def build_tfidf_vector(
 
     return vector
 
+
 def cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
     dot = sum(a * b for a, b in zip(vec1, vec2))
     norm1 = math.sqrt(sum(a ** 2 for a in vec1))
@@ -74,38 +78,40 @@ def cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
         return 0.0
     return dot / (norm1 * norm2)
 
+
 def tfidf_similarity(
     user_ingredients: List[str],
     recipe_ingredients: List[str]
 ) -> float:
-    user_norm   = [normalize(i) for i in user_ingredients]
+    user_norm = [normalize(i) for i in user_ingredients]
     recipe_norm = [normalize(i) for i in recipe_ingredients]
 
     all_words = list(set(user_norm + recipe_norm))
     if not all_words:
         return 0.0
 
-    vec_user   = build_tfidf_vector(user_norm, all_words)
+    vec_user = build_tfidf_vector(user_norm, all_words)
     vec_recipe = build_tfidf_vector(recipe_norm, all_words)
 
     return cosine_similarity(vec_user, vec_recipe)
 
 
-
 _model = None
+
 
 def get_transformer_model():
     global _model
     if _model is None:
         try:
             from sentence_transformers import SentenceTransformer
-            import numpy as np
-            _model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+            _model = SentenceTransformer(
+                'paraphrase-multilingual-MiniLM-L12-v2')
             print(" AI Model loaded successfully!")
         except Exception as e:
             print(f" Transformer not available: {e}")
             _model = "unavailable"
     return _model if _model != "unavailable" else None
+
 
 def transformer_similarity(
     user_ingredients: List[str],
@@ -116,16 +122,15 @@ def transformer_similarity(
         return 0.0
     try:
         import numpy as np
-        user_text   = " ".join(user_ingredients)
+        user_text = " ".join(user_ingredients)
         recipe_text = " ".join(recipe_ingredients)
-        embeddings  = model.encode([user_text, recipe_text])
-        similarity  = np.dot(embeddings[0], embeddings[1]) / (
+        embeddings = model.encode([user_text, recipe_text])
+        similarity = np.dot(embeddings[0], embeddings[1]) / (
             np.linalg.norm(embeddings[0]) * np.linalg.norm(embeddings[1])
         )
         return float(similarity)
     except Exception:
         return 0.0
-
 
 
 def ai_recommend(
@@ -168,7 +173,7 @@ def ai_recommend(
             )
 
         # فقط نتائج ذات قيمة
-        if simple["match_percent"] >= 20:
+        if simple["match_percent"] >= 1:
             results.append({
                 "recipe": recipe,
                 "match_percent":        round(simple["match_percent"]),
@@ -182,24 +187,3 @@ def ai_recommend(
 
     results.sort(key=lambda x: x["ai_score"], reverse=True)
     return results[:limit]
-
-
-
-
-def suggest_missing(
-    user_ingredients: List[str],
-    db: Session,
-    lang: str = 'ar'
-) -> List[Dict]:
-    recommendations = ai_recommend(user_ingredients, db, lang, limit=5)
-    suggestions = []
-
-    for item in recommendations:
-        if item["missing_ingredients"]:
-            suggestions.append({
-                "recipe_name": item["recipe"].name_ar if lang == 'ar' else item["recipe"].name_en,
-                "missing": item["missing_ingredients"][:3],
-                "match_percent": item["match_percent"],
-            })
-
-    return suggestions

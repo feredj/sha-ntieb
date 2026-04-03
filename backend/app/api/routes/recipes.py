@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from ...core.database import get_db
-from ...models.recipe import Recipe, Ingredient, RecipeIngredient, Favorite, Rating
-from ...schemas.recipe import RecipeOut, RecipeCreate
-from ...services.ai_engine import ai_recommend, suggest_missing
+from ...models.recipe import Recipe, Rating
+from ...schemas.recipe import RecipeOut
+from ...services.ai_engine import ai_recommend
 
 router = APIRouter(prefix="/recipes", tags=["Recipes"])
 
@@ -80,7 +80,8 @@ def rate_recipe(
         db: Session = Depends(get_db)
 ):
     if score < 1 or score > 5:
-        raise HTTPException(status_code=400, detail="Score must be between 1 and 5")
+        raise HTTPException(
+            status_code=400, detail="Score must be between 1 and 5")
 
     existing = db.query(Rating).filter(
         Rating.user_id == user_id,
@@ -103,6 +104,7 @@ def rate_recipe(
 
     return {"message": "Rated successfully", "new_rating": recipe.rating}
 
+
 @router.post("/ai-search")
 def ai_search(
     ingredients: List[str],
@@ -113,7 +115,7 @@ def ai_search(
         user_ingredients=ingredients,
         db=db,
         lang=lang,
-        limit=10
+        limit=10,
     )
 
     return [

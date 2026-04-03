@@ -7,6 +7,7 @@ from ...schemas.user import UserCreate, UserLogin, Token
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
+
 @router.post("/register", response_model=Token)
 def register(data: UserCreate, db: Session = Depends(get_db)):
     # chek email
@@ -34,6 +35,7 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
         db.rollback()
         print(f"Register error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/login", response_model=Token)
 def login(data: UserLogin, db: Session = Depends(get_db)):

@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ..core.database import Base
 
+
 class Ingredient(Base):
     __tablename__ = "ingredients"
 
@@ -12,15 +13,18 @@ class Ingredient(Base):
     name_en = Column(String(255), nullable=False)
     category = Column(String(100))
 
+
 class RecipeIngredient(Base):
     __tablename__ = "recipe_ingredients"
 
     id = Column(Integer, primary_key=True)
     recipe_id = Column(Integer, ForeignKey("recipes.id", ondelete="CASCADE"))
-    ingredient_id = Column(Integer, ForeignKey("ingredients.id", ondelete="CASCADE"))
+    ingredient_id = Column(Integer, ForeignKey(
+        "ingredients.id", ondelete="CASCADE"))
     quantity = Column(String(100))
     unit = Column(String(50))
     ingredient = relationship("Ingredient")
+
 
 class Recipe(Base):
     __tablename__ = "recipes"
@@ -41,6 +45,7 @@ class Recipe(Base):
     created_at = Column(DateTime, server_default=func.now())
     ingredients = relationship("RecipeIngredient", cascade="all, delete")
 
+
 class Favorite(Base):
     __tablename__ = "favorites"
 
@@ -48,6 +53,7 @@ class Favorite(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     recipe_id = Column(Integer, ForeignKey("recipes.id", ondelete="CASCADE"))
     created_at = Column(DateTime, server_default=func.now())
+
 
 class Rating(Base):
     __tablename__ = "ratings"

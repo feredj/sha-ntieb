@@ -14,7 +14,9 @@ app = FastAPI(
     description=" تطبيق اقتراح الوصفات الجزائرية"
 )
 
-#show all errors
+# show all errors
+
+
 @app.middleware("http")
 async def catch_exceptions(request: Request, call_next):
     try:
@@ -37,6 +39,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api")
 app.include_router(recipes.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
+
 
 @app.get("/")
 def root():

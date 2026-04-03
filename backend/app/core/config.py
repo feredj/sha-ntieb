@@ -4,6 +4,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+
 class Settings(BaseSettings):
     DB_HOST: str
     DB_PORT: int = 3306
@@ -22,4 +23,6 @@ class Settings(BaseSettings):
         "env_file_encoding": "utf-8",
         "extra": "ignore"
     }
+
+
 settings = Settings()
